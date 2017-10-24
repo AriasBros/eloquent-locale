@@ -1,0 +1,58 @@
+{
+  "name": "ariasbros/eloquent-locale",
+  "description": "A package to make Eloquent models localizables",
+  "keywords": [
+    "ariasbros",
+    "eloquent-locale",
+    "laravel",
+    "eloquent",
+    "translation",
+    "translate",
+    "model",
+    "i8n",
+    "multilingual"
+  ],
+  "homepage": "https://github.com/AriasBros/eloquent-locale",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "David Arias Vázquez",
+      "email": "david@ariasbros.com",
+      "homepage": "https://www.ariasbros.com",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php" : "^7.0",
+    "illuminate/database": "~5.5.0",
+    "illuminate/support": "~5.5.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^6.3",
+    "orchestra/testbench": "~3.5.0",
+    "mockery/mockery": "^0.9.4"
+  },
+  "autoload": {
+    "psr-4": {
+      "Locale\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Locale\\Tests\\": "tests"
+    }
+  },
+  "scripts": {
+    "test": "vendor/bin/phpunit"
+  },
+  "config": {
+    "sort-packages": true
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Locale\\ServiceProvider"
+      ]
+    }
+  }
+}

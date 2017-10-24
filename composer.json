@@ -9,7 +9,10 @@
     "translation",
     "translate",
     "model",
-    "i8n",
+    "l10n",
+    "localization",
+    "l12y",
+    "localizability",
     "multilingual"
   ],
   "homepage": "https://github.com/AriasBros/eloquent-locale",

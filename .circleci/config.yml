@@ -8,7 +8,7 @@ jobs:
       - checkout
       - run: mkdir -p build/logs
       - run: sudo apt install -y libsqlite3-dev
-      - run: docker-php-ext-enable xdebug
+      - run: sudo docker-php-ext-enable xdebug
       - run: sudo composer self-update
       - restore_cache:
           keys:

@@ -13,6 +13,7 @@ use Illuminate\Database\Query\Builder;
  * @package Locale\Models
  *
  * @method static Builder create(array $attributes)
+ * @method static Locale find(string $id)
  *
  * @property integer id
  * @property string name

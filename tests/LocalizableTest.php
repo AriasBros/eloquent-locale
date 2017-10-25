@@ -2,7 +2,9 @@
 
 namespace Locale\Tests;
 
+use Illuminate\Database\Eloquent\Model;
 use Locale\Models\Locale;
+use Locale\Tests\Models\Bar;
 use Locale\Tests\Models\Foo;
 
 /**
@@ -11,27 +13,46 @@ use Locale\Tests\Models\Foo;
  * @since 1.0.0
  * @package Locale\Tests
  */
-class LocalizableTest extends TestCase
+abstract class LocalizableTest extends TestCase
 {
+    /**
+     * @since 1.0.0
+     * @var string
+     */
+    const SPANISH_NAME = "Nombre en español";
+
+    /**
+     * @since 1.0.0
+     * @var string
+     */
+    const SPANISH_DESCRIPTION = "Descripción en español";
+
+    /**
+     * @since 1.0.0
+     * @param array $attributes
+     * @return mixed
+     */
+    abstract protected function createModel(array $attributes = []);
+
     /**
      * @since 1.0.0
      */
     public function testAddTranslationToTheModel()
     {
-        /** @var Foo $model */
-        $model = Foo::create([
+        /** @var Foo|Bar $model */
+        $model = $this->createModel([
             "color" => "#FF00000"
         ]);
 
         $model->locales()->save(Locale::find("es"), [
-            "name" => "Nombre en español",
-            "description" => "Descripción en español"
+            "name" => self::SPANISH_NAME,
+            "description" => self::SPANISH_DESCRIPTION
         ]);
 
         $this->app->setLocale("es");
 
-        $this->assertSame("Nombre en español", $model->name);
-        $this->assertSame("Descripción en español", $model->description);
+        $this->assertSame(self::SPANISH_NAME, $model->name);
+        $this->assertSame(self::SPANISH_DESCRIPTION, $model->description);
     }
 
     /**
@@ -41,15 +62,15 @@ class LocalizableTest extends TestCase
     {
         $this->app->setLocale("es");
 
-        /** @var Foo $model */
-        $model = Foo::create([
+        /** @var Foo|Bar $model */
+        $model = $this->createModel([
             "color" => "#FF00000",
-            "name" => "Nombre en español",
-            "description" => "Descripción en español"
+            "name" => self::SPANISH_NAME,
+            "description" => self::SPANISH_DESCRIPTION
         ]);
 
-        $this->assertSame("Nombre en español", $model->name);
-        $this->assertSame("Descripción en español", $model->description);
+        $this->assertSame(self::SPANISH_NAME, $model->name);
+        $this->assertSame(self::SPANISH_DESCRIPTION, $model->description);
     }
 
     /**
@@ -57,8 +78,8 @@ class LocalizableTest extends TestCase
      */
     public function testFallbackToDefaultTranslation()
     {
-        /** @var Foo $model */
-        $model = Foo::create([
+        /** @var Foo|Bar $model */
+        $model = $this->createModel([
             "color" => "#FF00000",
             "name" => "Name in english",
             "description" => "Description in english"
@@ -66,7 +87,68 @@ class LocalizableTest extends TestCase
 
         $this->app->setLocale("es");
 
-        $this->assertSame("Name in english", $model->name);
-        $this->assertSame("Description in english", $model->description);
+        if ($model->usesFallbackLocale()) {
+            $this->assertSame("Name in english", $model->name);
+            $this->assertSame("Description in english", $model->description);
+        } else {
+            $this->assertNull($model->name);
+            $this->assertNull($model->description);
+        }
+    }
+
+    /**
+     * @since 1.0.0
+     */
+    public function testSetTranslationUsingSaveMethod()
+    {
+        /** @var Foo|Bar $model */
+        $model = $this->createModel([
+            "color" => "#FF00000",
+        ]);
+
+        $locale = "es";
+        $this->app->setLocale($locale);
+
+        $model->name = self::SPANISH_NAME;
+        $model->description = self::SPANISH_DESCRIPTION;
+
+        $this->assertSame(self::SPANISH_NAME, $model->name);
+        $this->assertSame(self::SPANISH_DESCRIPTION, $model->description);
+
+        $model->save();
+        $this->assertDatabaseHas("locale_model", [
+            "model_id" => $model->id,
+            "locale_id" => $locale,
+            "name" => self::SPANISH_NAME,
+            "description" => self::SPANISH_DESCRIPTION
+        ]);
+    }
+
+    /**
+     * @since 1.0.0
+     */
+    public function testSetTranslationUsingUpdateMethod()
+    {
+        /** @var Foo|Bar $model */
+        $model = $this->createModel([
+            "color" => "#FF00000",
+        ]);
+
+        $locale = "es";
+        $this->app->setLocale($locale);
+
+        $model->update([
+            "name" => self::SPANISH_NAME,
+            "description" => self::SPANISH_DESCRIPTION
+        ]);
+
+        $this->assertSame(self::SPANISH_NAME, $model->name);
+        $this->assertSame(self::SPANISH_DESCRIPTION, $model->description);
+        $this->assertDatabaseHas("locale_model", [
+            "model_id" => $model->id,
+            "locale_id" => $locale,
+            "name" => self::SPANISH_NAME,
+            "description" => self::SPANISH_DESCRIPTION
+        ]);
     }
 }

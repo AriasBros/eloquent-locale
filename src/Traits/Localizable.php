@@ -3,7 +3,9 @@
 namespace Locale\Traits;
 
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Query\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Str;
 use Locale\Models\Locale;
 
 /**
@@ -12,16 +14,34 @@ use Locale\Models\Locale;
  * @since 1.0.0
  * @package Locale\Traits
  *
- * @method Builder belongsToMany(string $modelClass)
+ * @method BelongsToMany belongsToMany($modelClass, $joiningTable, $modelForeignKey, $localeForeignKey)
  *
  * @property array localize
- * @property bool locale_timestamps
- * @property bool fallback_locale
  * @property Locale locale
  * @property Collection locales
  */
 trait Localizable
 {
+    /**
+     * Determine if the model uses locale timestamps.
+     *
+     * @return bool
+     */
+    public function usesLocaleTimestamps()
+    {
+        return $this->locale_timestamps ?? false;
+    }
+
+    /**
+     * Determine if the model uses fallback locale.
+     *
+     * @return bool
+     */
+    public function usesFallbackLocale()
+    {
+        return $this->fallback_locale ?? false;
+    }
+
     /**
      * Save the model to the database.
      *
@@ -30,7 +50,8 @@ trait Localizable
      */
     public function save(array $options = [])
     {
-        $keys = array_merge($this->localize, ["locale_id"]);
+        $localeForeignKey = "locale_id";
+        $keys = array_merge($this->localize, [$localeForeignKey]);
         $localizeAttributes = array_only($this->attributes, $keys);
         $this->attributes = array_except($this->attributes, $keys);
 
@@ -38,9 +59,9 @@ trait Localizable
         $result = parent::save($options);
 
         if ($result && !empty($localizeAttributes)) {
-            if (isset($localizeAttributes["locale_id"])) {
-                $locale = Locale::find($localizeAttributes["locale_id"]);
-                unset($localizeAttributes["locale_id"]);
+            if (isset($localizeAttributes[$localeForeignKey])) {
+                $locale = Locale::find($localizeAttributes[$localeForeignKey]);
+                unset($localizeAttributes[$localeForeignKey]);
             } else {
                 $locale = Locale::find(app()->getLocale());
             }
@@ -121,7 +142,7 @@ trait Localizable
         $locales = $this->locales();
         $canBe = [app()->getLocale()];
 
-        if ($this->fallback_locale) {
+        if ($this->usesFallbackLocale()) {
             $canBe[] = config("app.fallback_locale");
         }
 
@@ -131,13 +152,21 @@ trait Localizable
 
     /**
      * @since 1.0.0
+     * @return BelongsToMany
      */
     public function locales()
     {
-        /** @noinspection PhpUndefinedMethodInspection */
-        $locales = $this->belongsToMany(config("locale.model"))->withPivot($this->localize)->as("translation");
+        $localeTable = config("locale.model");
+        $modelTable = $this->getTable();
+        $joiningTable = $this->joiningLocaleTable($localeTable, $modelTable);
+        $modelForeignKey = $this->getModelForeignKey();
+        $localeForeignKey = $this->getLocaleForeignKey();
 
-        if ($this->locale_timestamps) {
+        $locales = $this->belongsToMany($localeTable, $joiningTable, $modelForeignKey, $localeForeignKey)
+                        ->withPivot($this->localize)
+                        ->as("translation");
+
+        if ($this->usesLocaleTimestamps()) {
             /** @noinspection PhpUndefinedMethodInspection */
             $locales = $locales->withTimestamps();
         }
@@ -181,5 +210,46 @@ trait Localizable
 
         /** @noinspection PhpUndefinedMethodInspection */
         return parent::setRelation($relation, $value);
+    }
+
+    /**
+     * Get the joining locale table name.
+     *
+     * @param string $locale
+     * @param string $modelTable
+     * @return string
+     */
+    public function joiningLocaleTable($locale, $modelTable = null)
+    {
+        $models = [
+            Str::snake(class_basename($locale)),
+            $modelTable ? Str::singular($modelTable) : Str::snake(class_basename($this)),
+        ];
+
+        sort($models);
+
+        return strtolower(implode('_', $models));
+    }
+
+    /**
+     * Get the foreign key name for the model.
+     *
+     * @return string
+     */
+    public function getModelForeignKey()
+    {
+        return Str::singular($this->getTable()) . "_" . $this->primaryKey;
+    }
+
+    /**
+     * Get the foreign key name for the locale model.
+     *
+     * @return string
+     */
+    public function getLocaleForeignKey()
+    {
+        /** @var Model $instance */
+        $instance = $this->newRelatedInstance(config("locale.model"));
+        return Str::singular($instance->getTable()) . "_" . $instance->primaryKey;
     }
 }

@@ -3,6 +3,7 @@
 namespace Locale\Tests;
 
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 use Locale\Models\Locale;
 use Locale\ServiceProvider;
@@ -71,22 +72,22 @@ abstract class TestCase extends Orchestra
             $table->timestamps();
         });
 
-        $app['db']->connection()->getSchemaBuilder()->create('foos', function (Blueprint $table) {
+        $app['db']->connection()->getSchemaBuilder()->create('models', function (Blueprint $table) {
             $table->increments('id');
             $table->string('color');
             $table->timestamps();
         });
 
-        $app['db']->connection()->getSchemaBuilder()->create('foo_locale', function (Blueprint $table) {
+        $app['db']->connection()->getSchemaBuilder()->create('locale_model', function (Blueprint $table) {
             $table->string("locale_id", 2);
-            $table->integer("foo_id")->unsigned();
+            $table->integer("model_id")->unsigned();
 
             $table->string('name');
             $table->string('description');
             $table->timestamps();
 
-            $table->unique(["locale_id", "foo_id"], "unique_locale_foo");
-            $table->foreign('foo_id')->references('id')->on('foos');
+            $table->unique(["locale_id", "model_id"], "unique_locale_model");
+            $table->foreign('model_id')->references('id')->on('models');
 
         });
     }

@@ -2,10 +2,11 @@
 
 namespace Locale\Tests\Models;
 
-use Locale\Models\Localizable;
+use Illuminate\Database\Eloquent\Model;
+use Locale\Traits\Localizable;
 
 /**
- * Class Foo
+ * Class Bar
  *
  * @since 1.0.0
  * @package Locale\Tests\Models
@@ -18,8 +19,10 @@ use Locale\Models\Localizable;
  * @property string name
  * @property string description
  */
-class Foo extends Localizable
+class Bar extends Model
 {
+    use Localizable;
+
     /**
      * The table associated with the model.
      *

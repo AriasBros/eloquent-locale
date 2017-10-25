@@ -5,7 +5,7 @@ namespace Locale\Models;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Trait Localizable
+ * Class Localizable
  *
  * @since 1.0.0
  * @package Locale\Models

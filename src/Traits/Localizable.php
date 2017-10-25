@@ -22,6 +22,39 @@ use Locale\Models\Locale;
  */
 trait Localizable
 {
+    /**
+     * Save the model to the database.
+     *
+     * @param  array  $options
+     * @return bool
+     */
+    public function save(array $options = [])
+    {
+        $keys = array_merge($this->localize, ["locale_id"]);
+        $localizeAttributes = array_only($this->attributes, $keys);
+        $this->attributes = array_except($this->attributes, $keys);
+
+        /** @noinspection PhpUndefinedMethodInspection */
+        $result = parent::save($options);
+
+        if ($result && !empty($localizeAttributes)) {
+            if (isset($localizeAttributes["locale_id"])) {
+                $locale = Locale::find($localizeAttributes["locale_id"]);
+                unset($localizeAttributes["locale_id"]);
+            } else {
+                $locale = Locale::find(app()->getLocale());
+            }
+
+            if ($locale) {
+                $this->locales()->save($locale, $localizeAttributes);
+            } else {
+                // TODO - Throw exception?
+            }
+        }
+
+        return $result;
+    }
+
     //////////////
     // !Attributes
 

@@ -37,14 +37,29 @@ class LocalizableTest extends TestCase
     /**
      * @since 1.0.0
      */
+    public function testAddTranslationToTheModelWhenCreated()
+    {
+        $this->app->setLocale("es");
+
+        /** @var Foo $model */
+        $model = Foo::create([
+            "color" => "#FF00000",
+            "name" => "Nombre en español",
+            "description" => "Descripción en español"
+        ]);
+
+        $this->assertSame("Nombre en español", $model->name);
+        $this->assertSame("Descripción en español", $model->description);
+    }
+
+    /**
+     * @since 1.0.0
+     */
     public function testFallbackToDefaultTranslation()
     {
         /** @var Foo $model */
         $model = Foo::create([
-            "color" => "#FF00000"
-        ]);
-
-        $model->locales()->save(Locale::find("en"), [
+            "color" => "#FF00000",
             "name" => "Name in english",
             "description" => "Description in english"
         ]);

@@ -28,6 +28,13 @@ class Locale extends Model
     protected $keyType = 'string';
 
     /**
+     * Indicates if the IDs are auto-incrementing.
+     *
+     * @var bool
+     */
+    public $incrementing = false;
+
+    /**
      * The attributes that aren't mass assignable.
      *
      * @since 1.0.0

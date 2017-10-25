@@ -157,7 +157,7 @@ trait Localizable
     public function locales()
     {
         $localeTable = config("locale.model");
-        $modelTable = $this->getTable();
+        $modelTable = isset($this->table) ? $this->table : null;
         $joiningTable = $this->joiningLocaleTable($localeTable, $modelTable);
         $modelForeignKey = $this->getModelForeignKey();
         $localeForeignKey = $this->getLocaleForeignKey();
@@ -238,7 +238,13 @@ trait Localizable
      */
     public function getModelForeignKey()
     {
-        return Str::singular($this->getTable()) . "_" . $this->primaryKey;
+        if (!isset($this->table)) {
+            $model = Str::snake(class_basename($this));
+        } else {
+            $model = Str::singular($this->getTable());
+        }
+
+        return "{$model}_{$this->primaryKey}";
     }
 
     /**

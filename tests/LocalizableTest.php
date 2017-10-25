@@ -13,6 +13,9 @@ use Locale\Tests\Models\Foo;
  */
 class LocalizableTest extends TestCase
 {
+    /**
+     * @since 1.0.0
+     */
     public function testAddTranslationToTheModel()
     {
         /** @var Foo $model */
@@ -29,5 +32,26 @@ class LocalizableTest extends TestCase
 
         $this->assertSame("Nombre en español", $model->name);
         $this->assertSame("Descripción en español", $model->description);
+    }
+
+    /**
+     * @since 1.0.0
+     */
+    public function testFallbackToDefaultTranslation()
+    {
+        /** @var Foo $model */
+        $model = Foo::create([
+            "color" => "#FF00000"
+        ]);
+
+        $model->locales()->save(Locale::find("en"), [
+            "name" => "Name in english",
+            "description" => "Description in english"
+        ]);
+
+        $this->app->setLocale("es");
+
+        $this->assertSame("Name in english", $model->name);
+        $this->assertSame("Description in english", $model->description);
     }
 }

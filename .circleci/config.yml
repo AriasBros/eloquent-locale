@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/php:7.0.18-cli-browsers
+      - image: circleci/php:7.1.8-browsers
     working_directory: ~/eloquent-locale
     steps:
       - checkout

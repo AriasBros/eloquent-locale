@@ -6,15 +6,21 @@ jobs:
     working_directory: ~/eloquent-locale
     steps:
       - checkout
+      - run: mkdir -p build/logs
       - run: sudo apt install -y libsqlite3-dev
       - run: sudo composer self-update
       - restore_cache:
           keys:
             - composer-v1-{{ checksum "composer.json" }}
             - composer-v1-
-      - run: composer install -n --prefer-dist
+      - run: composer install --dev --no-interaction
       - save_cache:
           key: composer-v1-{{ checksum "composer.json" }}
           paths:
             - vendor
       - run: vendor/bin/phpunit
+      - run: vendor/bin/coveralls
+      - store_test_results:
+          path: build/logs
+      - store_artifacts:
+          path: build/logs

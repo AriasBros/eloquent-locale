@@ -205,6 +205,10 @@ trait Localizable
     public function setRelation($relation, $value)
     {
         if ($relation == "locale") {
+            /** @var Collection $value */
+            if ($value->count() > 1) {
+                $value = $value->where("id", app()->getLocale());
+            }
             $value = $value->first();
         }
 

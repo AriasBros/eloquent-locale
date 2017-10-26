@@ -105,12 +105,15 @@ trait Localizable
      */
     protected function getAttributeFromArray($key)
     {
-        if ($this->isLocalizableAttribute($key) && $this->locale) {
+        /** @noinspection PhpUndefinedMethodInspection */
+        $attribute = parent::getAttributeFromArray($key);
+
+        if (!$attribute && $this->isLocalizableAttribute($key) && $this->locale) {
             return $this->locale->translation->getAttribute($key);
         }
 
-        /** @noinspection PhpUndefinedMethodInspection */
-        return parent::getAttributeFromArray($key);
+        return $attribute;
+    }
 
     /**
      * Determine if the model uses locale timestamps.

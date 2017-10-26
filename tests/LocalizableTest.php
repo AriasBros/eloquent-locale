@@ -165,6 +165,25 @@ class LocalizableTest extends TestCase
     /**
      * @since 1.0.0
      */
+    public function testSetTranslationUsingLocaleIdAttribute()
+    {
+        $model = $this->createModel([
+            "color" => self::MODEL_COLOR,
+            "name" => self::MODEL_NAME_SPANISH,
+            "description" => self::MODEL_DESCRIPTION_SPANISH,
+            "locale_id" => self::SPANISH_LOCALE
+        ]);
+
+        $this->assertNull($model->name);
+        $this->assertNull($model->description);
+
+        $this->app->setLocale(self::SPANISH_LOCALE);
+        $this->assertTranslation($model->id, self::SPANISH_LOCALE, $model->name, $model->description);
+    }
+
+    /**
+     * @since 1.0.0
+     */
     public function testSetMultipleTranslationsChangingLocaleUsingSaveMethod()
     {
         $model = $this->createModel([
@@ -227,6 +246,38 @@ class LocalizableTest extends TestCase
         } else {
             $this->assertNull($model->locale_id);
         }
+    }
+
+    /**
+     * @since 1.0.0
+     */
+    public function testLocalesRelationship()
+    {
+        $model = $this->createModel([
+            "color" => self::MODEL_COLOR,
+            "name" => self::MODEL_NAME_ENGLISH,
+            "description" => self::MODEL_DESCRIPTION_ENGLISH
+        ]);
+
+        $model->update([
+            "name" => self::MODEL_NAME_SPANISH,
+            "description" => self::MODEL_DESCRIPTION_SPANISH,
+            "locale_id" => self::SPANISH_LOCALE
+        ]);
+
+        $this->assertTranslation($model->id, self::ENGLISH_LOCALE, $model->name, $model->description);
+        $this->app->setLocale(self::SPANISH_LOCALE);
+        $this->assertTranslation($model->id, self::SPANISH_LOCALE, $model->name, $model->description);
+        $this->assertCount(2, $model->locales);
+    }
+
+    /**
+     * @since 1.0.0
+     */
+    public function testLocalizableResource()
+    {
+        $response = $this->getJson("/model");
+        $response->assertHeader("Content-Language", "en");
     }
 
     /**

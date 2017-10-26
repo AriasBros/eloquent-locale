@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 use Locale\Models\Locale;
 use Locale\ServiceProvider;
+use Locale\Tests\Http\Resources\Model;
+use Locale\Tests\Models\Foo;
 use Orchestra\Testbench\TestCase as Orchestra;
 
 /**
@@ -66,6 +68,10 @@ abstract class TestCase extends Orchestra
 
         file_put_contents("{$tmp}/database.sqlite", null);
 
+        $app["router"]->get("/model", function () {
+            return new Model(Foo::find(1));
+        });
+
         $app['db']->connection()->getSchemaBuilder()->create('locales', function (Blueprint $table) {
             $table->string('id', 2)->primary();
             $table->string('name');
@@ -100,6 +106,12 @@ abstract class TestCase extends Orchestra
     {
         Locale::create(["id" => "en", "name" => "English"]);
         Locale::create(["id" => "es", "name" => "Español"]);
+
+        Foo::create([
+            "color" => "color",
+            "name" => "name",
+            "description" => "description"
+        ]);
     }
 
     /**

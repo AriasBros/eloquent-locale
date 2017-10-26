@@ -23,26 +23,6 @@ use Locale\Models\Locale;
 trait Localizable
 {
     /**
-     * Determine if the model uses locale timestamps.
-     *
-     * @return bool
-     */
-    public function usesLocaleTimestamps()
-    {
-        return $this->locale_timestamps ?? false;
-    }
-
-    /**
-     * Determine if the model uses fallback locale.
-     *
-     * @return bool
-     */
-    public function usesFallbackLocale()
-    {
-        return $this->fallback_locale ?? false;
-    }
-
-    /**
      * Save the model to the database.
      *
      * @param  array  $options
@@ -129,6 +109,25 @@ trait Localizable
 
         /** @noinspection PhpUndefinedMethodInspection */
         return parent::getAttributeFromArray($key);
+
+    /**
+     * Determine if the model uses locale timestamps.
+     *
+     * @return bool
+     */
+    public function usesLocaleTimestamps()
+    {
+        return $this->locale_timestamps ?? false;
+    }
+
+    /**
+     * Determine if the model uses fallback locale.
+     *
+     * @return bool
+     */
+    public function usesFallbackLocale()
+    {
+        return $this->fallback_locale ?? false;
     }
 
     /////////////////

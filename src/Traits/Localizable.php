@@ -5,6 +5,8 @@ namespace Locale\Traits;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Foundation\Events\LocaleUpdated;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Str;
 use Locale\Models\Locale;
 
@@ -208,7 +210,20 @@ trait Localizable
             if ($value->count() > 1) {
                 $value = $value->where("id", app()->getLocale());
             }
+
             $value = $value->first();
+
+            /** @var Locale $value */
+            if (!$value) {
+                return $this;
+            } else {
+                Event::listen(LocaleUpdated::class, function ($event) use ($value) {
+                    /** @var LocaleUpdated $event */
+                    if ($this->needsRefreshLocaleRelation($value, $event->locale)) {
+                        $this->removeLocaleRelation();
+                    }
+                });
+            }
         }
 
         /** @noinspection PhpUndefinedMethodInspection */
@@ -260,5 +275,26 @@ trait Localizable
         /** @var Model $instance */
         $instance = $this->newRelatedInstance(config("locale.model"));
         return Str::singular($instance->getTable()) . "_" . $instance->primaryKey;
+    }
+
+    /**
+     * @since 1.0.0
+     */
+    public function removeLocaleRelation()
+    {
+        $relations = $this->getRelations();
+        unset($relations["locale"]);
+        $this->setRelations($relations);
+    }
+
+    /**
+     * @since 1.0.0
+     * @param Locale $currentLocale
+     * @param string $newLocaleId
+     * @return bool
+     */
+    public function needsRefreshLocaleRelation($currentLocale, $newLocaleId)
+    {
+        return $currentLocale->id !== $newLocaleId;
     }
 }

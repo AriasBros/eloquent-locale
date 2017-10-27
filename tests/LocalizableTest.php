@@ -81,7 +81,7 @@ class LocalizableTest extends TestCase
 
         $this->app->setLocale(self::SPANISH_LOCALE);
 
-        $this->assertTranslation($model->id, self::SPANISH_LOCALE, $model->name, $model->description);
+        $this->assertTranslation($model, self::SPANISH_LOCALE);
     }
 
     /**
@@ -97,7 +97,7 @@ class LocalizableTest extends TestCase
             "description" => self::MODEL_DESCRIPTION_SPANISH
         ]);
 
-        $this->assertTranslation($model->id, self::SPANISH_LOCALE, $model->name, $model->description);
+        $this->assertTranslation($model, self::SPANISH_LOCALE);
     }
 
     /**
@@ -114,7 +114,7 @@ class LocalizableTest extends TestCase
         $this->app->setLocale(self::SPANISH_LOCALE);
 
         if ($model->usesFallbackLocale()) {
-            $this->assertTranslation($model->id, self::ENGLISH_LOCALE, $model->name, $model->description);
+            $this->assertTranslation($model, self::ENGLISH_LOCALE);
         } else {
             $this->assertNull($model->name);
             $this->assertNull($model->description);
@@ -140,7 +140,7 @@ class LocalizableTest extends TestCase
 
         $model->save();
 
-        $this->assertTranslation($model->id, self::SPANISH_LOCALE, $model->name, $model->description);
+        $this->assertTranslation($model, self::SPANISH_LOCALE);
     }
 
     /**
@@ -159,7 +159,7 @@ class LocalizableTest extends TestCase
             "description" => self::MODEL_DESCRIPTION_SPANISH
         ]);
 
-        $this->assertTranslation($model->id, self::SPANISH_LOCALE, $model->name, $model->description);
+        $this->assertTranslation($model, self::SPANISH_LOCALE);
     }
 
     /**
@@ -178,7 +178,7 @@ class LocalizableTest extends TestCase
         $this->assertNull($model->description);
 
         $this->app->setLocale(self::SPANISH_LOCALE);
-        $this->assertTranslation($model->id, self::SPANISH_LOCALE, $model->name, $model->description);
+        $this->assertTranslation($model, self::SPANISH_LOCALE);
     }
 
     /**
@@ -192,7 +192,7 @@ class LocalizableTest extends TestCase
             "description" => self::MODEL_DESCRIPTION_ENGLISH
         ]);
 
-        $this->assertTranslation($model->id, self::ENGLISH_LOCALE, $model->name, $model->description);
+        $this->assertTranslation($model, self::ENGLISH_LOCALE);
 
         $this->app->setLocale(self::SPANISH_LOCALE);
 
@@ -200,7 +200,7 @@ class LocalizableTest extends TestCase
         $model->description = self::MODEL_DESCRIPTION_SPANISH;
         $model->save();
 
-        $this->assertTranslation($model->id, self::SPANISH_LOCALE, $model->name, $model->description);
+        $this->assertTranslation($model, self::SPANISH_LOCALE);
     }
 
     /**
@@ -214,7 +214,7 @@ class LocalizableTest extends TestCase
             "description" => self::MODEL_DESCRIPTION_ENGLISH
         ]);
 
-        $this->assertTranslation($model->id, self::ENGLISH_LOCALE, $model->name, $model->description);
+        $this->assertTranslation($model, self::ENGLISH_LOCALE);
 
         $this->app->setLocale(self::SPANISH_LOCALE);
 
@@ -223,7 +223,7 @@ class LocalizableTest extends TestCase
             "description" => self::MODEL_DESCRIPTION_SPANISH
         ]);
 
-        $this->assertTranslation($model->id, self::SPANISH_LOCALE, $model->name, $model->description);
+        $this->assertTranslation($model, self::SPANISH_LOCALE);
     }
 
     /**
@@ -265,9 +265,9 @@ class LocalizableTest extends TestCase
             "locale_id" => self::SPANISH_LOCALE
         ]);
 
-        $this->assertTranslation($model->id, self::ENGLISH_LOCALE, $model->name, $model->description);
+        $this->assertTranslation($model, self::ENGLISH_LOCALE);
         $this->app->setLocale(self::SPANISH_LOCALE);
-        $this->assertTranslation($model->id, self::SPANISH_LOCALE, $model->name, $model->description);
+        $this->assertTranslation($model, self::SPANISH_LOCALE);
         $this->assertCount(2, $model->locales);
     }
 
@@ -282,12 +282,10 @@ class LocalizableTest extends TestCase
 
     /**
      * @since 1.0.0
-     * @param $model_id
+     * @param Model $model
      * @param $locale_id
-     * @param $name
-     * @param $description
      */
-    protected function assertTranslation($model_id, $locale_id, $name, $description)
+    protected function assertTranslation($model, $locale_id)
     {
         if ($locale_id == self::ENGLISH_LOCALE) {
             $expented_name = self::MODEL_NAME_ENGLISH;
@@ -297,14 +295,16 @@ class LocalizableTest extends TestCase
             $expented_desc = self::MODEL_DESCRIPTION_SPANISH;
         }
 
-        $this->assertDatabaseHas("locale_model", [
-            "model_id" => $model_id,
+        $data = [
+            "model_id" => $model->id,
             "locale_id" => $locale_id,
             "name" => $expented_name,
             "description" => $expented_desc
-        ]);
+        ];
 
-        $this->assertSame($expented_name, $name);
-        $this->assertSame($expented_desc, $description);
+        $this->assertDatabaseHas("locale_model", $data);
+
+        $this->assertSame($expented_name, $model->name);
+        $this->assertSame($expented_desc, $model->description);
     }
 }

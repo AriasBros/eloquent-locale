@@ -14,6 +14,7 @@ use Illuminate\Database\Query\Builder;
  *
  * @method static Builder create(array $attributes)
  * @method static Locale find(string $id)
+ * @method static Builder whereKey(string $id)
  *
  * @property integer id
  * @property string name
@@ -42,4 +43,13 @@ class Locale extends Model
      * @var array
      */
     protected $guarded = [];
+
+    /**
+     * @since 1.0.0
+     * @return Locale
+     */
+    public static function current()
+    {
+        return Locale::find(app()->getLocale());
+    }
 }

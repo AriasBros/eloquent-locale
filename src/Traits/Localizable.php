@@ -49,7 +49,9 @@ trait Localizable
             }
 
             if ($locale) {
-                $this->locales()->save($locale, $localizeAttributes);
+                if (!$this->locales()->updateExistingPivot($locale->id, $localizeAttributes)) {
+                    $this->locales()->save($locale, $localizeAttributes);
+                }
             } else {
                 // TODO - Throw exception?
             }

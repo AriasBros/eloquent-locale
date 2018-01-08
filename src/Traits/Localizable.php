@@ -16,7 +16,7 @@ use Locale\Models\Locale;
  * @since 1.0.0
  * @package Locale\Traits
  *
- * @method BelongsToMany belongsToMany($modelClass, $joiningTable, $modelForeignKey, $localeForeignKey)
+ * @method BelongsToMany belongsToMany($modelClass, $joiningTable = null, $modelForeignKey = null, $localeForeignKey = null)
  *
  * @property array localize
  * @property Locale locale

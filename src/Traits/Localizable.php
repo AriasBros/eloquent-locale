@@ -158,8 +158,13 @@ trait Localizable
             $canBe[] = config("app.fallback_locale");
         }
 
-        /** @noinspection PhpUndefinedMethodInspection */
-        return $locales->whereIn("id", $canBe);
+        $locale = $locales->whereIn("id", $canBe);
+
+        if ($this->usesFallbackLocale() && $locale->count() === 0) {
+            $locale = $this->locales()->take(1);
+        }
+
+        return $locale;
     }
 
     /**

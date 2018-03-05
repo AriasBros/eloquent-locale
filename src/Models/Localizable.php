@@ -36,7 +36,7 @@ abstract class Localizable extends Model
      * @since 1.0.0
      * @var bool
      */
-    public $locale_timestamps = true;
+    protected $localeTimestamps = true;
 
     /**
      * Indicates that, if translation in current locale is missing, translation can be the fallback_locale of the app.
@@ -44,5 +44,5 @@ abstract class Localizable extends Model
      * @since 1.0.0
      * @var bool
      */
-    public $fallback_locale = true;
+    protected $fallbackLocale = true;
 }

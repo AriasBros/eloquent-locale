@@ -32,12 +32,14 @@ trait Localizable
      */
     public function save(array $options = [])
     {
+        /** @var Model $this */
         $localeForeignKey = "locale_id";
         $keys = array_merge($this->localize, [$localeForeignKey]);
         $localizeAttributes = array_only($this->attributes, $keys);
         $this->attributes = array_except($this->attributes, $keys);
 
         /** @noinspection PhpUndefinedMethodInspection */
+        /** @noinspection PhpUndefinedClassInspection */
         $result = parent::save($options);
 
         if ($result && !empty($localizeAttributes)) {
@@ -91,11 +93,14 @@ trait Localizable
      */
     public function getAttribute($key)
     {
+        /** @var Model $this */
+
         if ($this->isLocalizableAttribute($key)) {
             return $this->getAttributeValue($key);
         }
 
         /** @noinspection PhpUndefinedMethodInspection */
+        /** @noinspection PhpUndefinedClassInspection */
         return parent::getAttribute($key);
     }
 
@@ -108,6 +113,7 @@ trait Localizable
     protected function getAttributeFromArray($key)
     {
         /** @noinspection PhpUndefinedMethodInspection */
+        /** @noinspection PhpUndefinedClassInspection */
         $attribute = parent::getAttributeFromArray($key);
 
         if (!$attribute && $this->isLocalizableAttribute($key) && $this->locale) {
@@ -124,7 +130,7 @@ trait Localizable
      */
     public function usesLocaleTimestamps()
     {
-        return $this->locale_timestamps ?? false;
+        return isset($this->localeTimestamps) ? $this->localeTimestamps : true;
     }
 
     /**
@@ -134,7 +140,7 @@ trait Localizable
      */
     public function usesFallbackLocale()
     {
-        return $this->fallback_locale ?? false;
+        return isset($this->fallbackLocale) ? $this->fallbackLocale : true;
     }
 
     /////////////////
@@ -152,8 +158,13 @@ trait Localizable
             $canBe[] = config("app.fallback_locale");
         }
 
-        /** @noinspection PhpUndefinedMethodInspection */
-        return $locales->whereIn("id", $canBe);
+        $locale = $locales->whereIn("id", $canBe);
+
+        if ($this->usesFallbackLocale() && $locale->count() === 0) {
+            $locale = $this->locales()->take(1);
+        }
+
+        return $locale;
     }
 
     /**
@@ -287,6 +298,7 @@ trait Localizable
      */
     public function removeLocaleRelation()
     {
+        /** @var Model $this */
         $relations = $this->getRelations();
         unset($relations["locale"]);
         $this->setRelations($relations);

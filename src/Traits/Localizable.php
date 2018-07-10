@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Events\LocaleUpdated;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Str;
+use Locale\Database\LocalizableBuilder;
 use Locale\Models\Locale;
 
 /**
@@ -24,6 +25,27 @@ use Locale\Models\Locale;
  */
 trait Localizable
 {
+    /**
+     * Create a new Eloquent query builder for the model.
+     *
+     * @param  \Illuminate\Database\Query\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function newEloquentBuilder($query)
+    {
+        return new LocalizableBuilder($query);
+    }
+
+    /**
+     * Get all of the current localizable attributes on the model.
+     *
+     * @return array
+     */
+    public function getLocalizableAttributes()
+    {
+        return array_only($this->locale->translation->getAttributes(), $this->localize);
+    }
+
     /**
      * Save the model to the database.
      *
